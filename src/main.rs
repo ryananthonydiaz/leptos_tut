@@ -1,10 +1,26 @@
 use leptos::*;
 
 #[component]
-fn App() -> impl IntoView {
-    let (count, set_count)= create_signal(0);
-    let double_count = move || count() * 2;
+fn ProgressBar(
+    // mark this prop optional
+    // you can specify it or not when you use <ProgressBar/>
+    #[prop(default = 100)] max: u16,
+    #[prop(into)] progress: Signal<i32>,
+) -> impl IntoView {
+    view! {
+        <progress
+            max=max
+            value=progress
+        />
+    }
+}
 
+#[component]
+fn App() -> impl IntoView {
+    let count: ReadSignal<i32>;
+    let set_count: WriteSignal<i32>;
+    (count, set_count) = create_signal(0);
+    let double_count = move || count() * 2;
 
     view! {
         <button
@@ -16,16 +32,9 @@ fn App() -> impl IntoView {
             "Click me: "
             {move || count()}
         </button>
-        <progress
-            max="50"
-            // signals are functions, so this <=> `move || count.get()`
-            value=double_count
-        />
-        <p>
-            "Double Counts: "
-            // and again here
-            {double_count}
-        </p>
+        <ProgressBar progress=count />
+        // add a second progress bar
+        <ProgressBar progress=Signal::derive(double_count)/>
     }
 }
 
