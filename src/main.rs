@@ -1,58 +1,27 @@
 use leptos::*;
 
-#[derive(Debug, Clone)]
-struct DatabaseEntry {
-    key: String,
-    value: RwSignal<i32>,
-}
 #[component]
 fn App() -> impl IntoView {
-    // start with a set of three rows
-    let (data, set_data) = create_signal(vec![
-        DatabaseEntry {
-            key: "foo".to_string(),
-            value: create_rw_signal(10),
-        },
-        DatabaseEntry {
-            key: "bar".to_string(),
-            value: create_rw_signal(20),
-        },
-        DatabaseEntry {
-            key: "baz".to_string(),
-            value: create_rw_signal(15),
-        },
-    ]);
-
+    let name: ReadSignal<String>;
+    let set_name: WriteSignal<String>;
+    (name, set_name) = create_signal("Controlled".to_string());
     view! {
-        // when we click, update each row,
-        // doubling its value
-        <button on:click=move |_| {
-            data.with(|data| {
-                for row in data {
-                    row.value.update(|value| *value *= 2)
-                }
-            });
-            // log the new value of the signal
-            logging::log!("{:?}", data.get())
-        }>
-            "Update Values"
-        </button>
-        <For
-            each=move || data().into_iter().enumerate()
-            key=|(_, state)| state.key.clone()
-            children=move |(index, _)| {
-                let value = create_memo(move |_| {
-                    return data.with(|data| data
-                                     .get(index)
-                                     .map(|d| d.value)
-                                     .unwrap_or(create_rw_signal(0)))
-                });
-                view! {
-                    <p>{value}</p>
-                }
+        <input
+            type="text"
+            on:input=move |ev| {
+                // event_target_value is a Leptos helper function
+                // it functions the same way as event.target.value
+                // in JavaScript, but smooths out some of the typecasting
+                // necessary to make this work in Rust
+                set_name(event_target_value(&ev));
             }
-        />
+            
+            // the `prop:` syntax lets you update a DOM property,
+            // rather than an attribute.
+            prop:value=name
 
+        />
+        <p>"Name is: " {name}</p> 
     }
 }
 
