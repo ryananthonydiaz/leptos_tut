@@ -29,7 +29,7 @@ fn App() -> impl IntoView {
         <button on:click=move |_| {
             data.with(|data| {
                 for row in data {
-                    row.value.update(|value| *value *= 2) 
+                    row.value.update(|value| *value *= 2)
                 }
             });
             // log the new value of the signal
@@ -38,12 +38,21 @@ fn App() -> impl IntoView {
             "Update Values"
         </button>
         <For
-            each=data
-            key=|state| state.key.clone() 
-            let:child
-        >
-            <p>{child.value}</p>
-        </For>
+            each=move || data().into_iter().enumerate()
+            key=|(_, state)| state.key.clone()
+            children=move |(index, _)| {
+                let value = create_memo(move |_| {
+                    return data.with(|data| data
+                                     .get(index)
+                                     .map(|d| d.value)
+                                     .unwrap_or(create_rw_signal(0)))
+                });
+                view! {
+                    <p>{value}</p>
+                }
+            }
+        />
+
     }
 }
 
