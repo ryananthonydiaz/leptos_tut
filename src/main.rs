@@ -1,40 +1,49 @@
 use leptos::*;
 
-#[component]
-fn ProgressBar(
-    // mark this prop optional
-    // you can specify it or not when you use <ProgressBar/>
-    #[prop(default = 100)] max: u16,
-    #[prop(into)] progress: Signal<i32>,
-) -> impl IntoView {
-    view! {
-        <progress
-            max=max
-            value=progress
-        />
-    }
+#[derive(Debug, Clone)]
+struct DatabaseEntry {
+    key: String,
+    value: RwSignal<i32>,
 }
-
 #[component]
 fn App() -> impl IntoView {
-    let count: ReadSignal<i32>;
-    let set_count: WriteSignal<i32>;
-    (count, set_count) = create_signal(0);
-    let double_count = move || count() * 2;
+    // start with a set of three rows
+    let (data, set_data) = create_signal(vec![
+        DatabaseEntry {
+            key: "foo".to_string(),
+            value: create_rw_signal(10),
+        },
+        DatabaseEntry {
+            key: "bar".to_string(),
+            value: create_rw_signal(20),
+        },
+        DatabaseEntry {
+            key: "baz".to_string(),
+            value: create_rw_signal(15),
+        },
+    ]);
 
     view! {
-        <button
-            class=("red", move || count() % 2 == 1)
-            on:click=move |_| {
-                set_count.update(|n| *n += 1);
-            }
-        >
-            "Click me: "
-            {move || count()}
+        // when we click, update each row,
+        // doubling its value
+        <button on:click=move |_| {
+            data.with(|data| {
+                for row in data {
+                    row.value.update(|value| *value *= 2) 
+                }
+            });
+            // log the new value of the signal
+            logging::log!("{:?}", data.get())
+        }>
+            "Update Values"
         </button>
-        <ProgressBar progress=count />
-        // add a second progress bar
-        <ProgressBar progress=Signal::derive(double_count)/>
+        <For
+            each=data
+            key=|state| state.key.clone() 
+            let:child
+        >
+            <p>{child.value}</p>
+        </For>
     }
 }
 
