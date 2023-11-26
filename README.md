@@ -3,6 +3,9 @@
 ### How to run the application:
 `trunk serve`
 
+### How to format application:
+run `cargo fmt`
+
 ### Where is this book located?:
 [Leptos Book](https://leptos-rs.github.io/leptos/01_introduction.html)
 
