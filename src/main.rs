@@ -7,15 +7,22 @@ fn App() -> impl IntoView {
     (value, set_value) = create_signal(0);
     let is_odd = move || value() & 1 == 1;
 
-    let message = move || match value() {
-        0 => "Zero",
-        1 => "One",
-        n if is_odd() => "Odd",
-        _ => "Even",
-    };
-
     view! {
-        <p>{message}</p>
+        <main>
+        {move || match is_odd() {
+                                    true if value() == 1 => {
+                                        // returns HtmlElement<Pre>
+                                        view! { <pre>"One"</pre> }.into_any()
+                                    },
+                                    false if value() == 2 => {
+                                        // returns HtmlElement<P>
+                                        view! {
+                                            <p>"Two"</p>
+                                        }.into_any()
+                                    },
+                                    _ => view! { <textarea>{value()}</textarea>}.into_any()
+                                }}
+        </main>
     }
 }
 
