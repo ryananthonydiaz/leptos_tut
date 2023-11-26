@@ -7,14 +7,16 @@ fn App() -> impl IntoView {
     (value, set_value) = create_signal(0);
     let is_odd = move || value() & 1 == 1;
 
-    view! {
-        <p>
-        {move || if is_odd() {
-            "Odd"
+    let message = move || {
+        if is_odd() {
+            return Some("Ding ding ding!");
         } else {
-            "Even"
-        }}
-        </p>
+            return None;
+        }
+    };
+
+    view! {
+        <p>{message}</p>
     }
 }
 
